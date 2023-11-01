@@ -3,6 +3,7 @@
 #include "proto/test.pb.h"
 #include <google/protobuf/util/json_util.h>
 #include "ert/json2xml.hpp"
+#include "xml2json.hpp"
 
 
 int main() {
@@ -88,7 +89,25 @@ int main() {
         std::cerr << "Conversion error !" << std::endl;
 
     // output xml
-    std::cout << consumer.getXmlString();
+    std::string xmlString {consumer.getXmlString()};
+    std::cout << xmlString;
+    std::cout << "\n\n";
+    //Doesn't work. Bad xml
+    //xml2json(xmlString.data());
+    xmlString = "<RESULT>\n"
+                "  <PROCESS_OK> 1 </PROCESS_OK>\n"
+                "  <RESULT_IN> 3 </RESULT_IN>\n"
+                "  <RESULTS>\n"
+                "    <VALUE>\n"
+                "      <NAME> adsf </NAME>\n"
+                "      <WERT> 1.12E-5 </WERT>\n"
+                "    </VALUE>\n"
+                "  </RESULTS>\n"
+                "</RESULT>";
+
+    std::cout << xmlString << "\n\n";
+    std::cout << xml2json(xmlString.data()) << std::endl;
+
     return 0;
 
 }
