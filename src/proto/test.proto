@@ -34,6 +34,7 @@ message DataType{
 }
 message Result
 {
+    optional ResultInt result_int = 1[(xml_field_options)={name:"RESULT_INT"}];
     message Results{
         message Value{
             string name = 1;
@@ -41,7 +42,7 @@ message Result
         }
         repeated Value values = 1;
     }
-    optional Results results = 1;
-    optional DataType data_type = 2;
-    optional google.protobuf.Any data = 3;
+    optional Results results = 2;
+    optional DataType data_type = 3;
+    optional google.protobuf.Any data = 4;
 }
