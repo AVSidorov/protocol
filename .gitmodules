@@ -1,0 +1,6 @@
+[submodule "xml2json"]
+	path = xml2json
+	url = https://github.com/Cheedoong/xml2json.git
+[submodule "json2xml"]
+	path = json2xml
+	url = https://github.com/testillano/json2xml.git

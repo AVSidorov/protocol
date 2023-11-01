@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
-#include "src/proto/test.pb.h"
+#include "proto/test.pb.h"
 #include <google/protobuf/util/json_util.h>
+#include "ert/json2xml.hpp"
 
 
 int main() {
@@ -79,6 +80,15 @@ int main() {
     std::cout << message.DebugString() << std::endl;
 
     google::protobuf::ShutdownProtobufLibrary();
+
+    ert::JsonSaxConsumer consumer(2);
+    bool success = nlohmann::json::sax_parse(outstring, &consumer);
+
+    if (!success)
+        std::cerr << "Conversion error !" << std::endl;
+
+    // output xml
+    std::cout << consumer.getXmlString();
     return 0;
 
 }
