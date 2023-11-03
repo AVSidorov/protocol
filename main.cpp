@@ -113,14 +113,15 @@ int main() {
                 "      <NAME> adsf </NAME>\n"
                 "      <WERT> zzvzx </WERT>\n"
                 "    </MESSWERT>\n"
-//                "    <MESSWERT>\n"
-//                "      <NAME> ddd </NAME>\n"
-//                "      <WERT> 1.32E-12 </WERT>\n"
-//                "    </MESSWERT>\n"
+                "    <MESSWERT>\n"
+                "      <NAME> ddd </NAME>\n"
+                "      <WERT> 1.32E-12 </WERT>\n"
+                "    </MESSWERT>\n"
                 "  </RESULT-DATA>\n"
-//                "  <ERROR_TEXT>\n"
+                "  <ERROR_TEXT>\n"
+                "     sas\n"
 //                "     Petya byl golodniy.\n"
-//                "  </ERROR_TEXT>\n"
+                "  </ERROR_TEXT>\n"
                 "</RESULT>";
 
     std::cout << xmlString << "\n\n";
