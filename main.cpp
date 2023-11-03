@@ -120,7 +120,7 @@ int main() {
                 "  </RESULT-DATA>\n"
                 "  <ERROR_TEXT>\n"
                 "     sas\n"
-//                "     Petya byl golodniy.\n"
+                "     \"Petya byl golodniy.\"\n"
                 "  </ERROR_TEXT>\n"
                 "</RESULT>";
 
