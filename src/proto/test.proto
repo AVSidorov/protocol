@@ -3,8 +3,11 @@ import "google/protobuf/descriptor.proto";
 import "google/protobuf/any.proto";
 
 message XmlOptions{
-    optional string name = 1;
+    optional string name = 1; // field or message name for xml tag <name></name>
     optional string description = 2;
+    optional bool is_element = 3; // it true <name> otherwise attribute <parent name= ...>
+    optional bool can_empty = 4; // if true can <name/> or <parent>
+                                 // if false <name></name> or <parent name="">
 }
 
 extend google.protobuf.MessageOptions{
@@ -26,23 +29,45 @@ package ops.sap;
 
 enum ResultInt{
     option (xml_enum_options) = {name: "RESULT_INT"};
-    OK = 0 [(xml_enum_value_options)={description: "Success"}];
-    UNKNOWN = 99;
+    RESULT_INT_OK = 0 [(xml_enum_value_options)={description: "Success"}];
+    RESULT_INT_UNKNOWN = 99;
 }
+enum StatusInt{
+    option (xml_enum_options) = {name: "RESULT_INT"};
+    STATUS_INT_OK = 0 [(xml_enum_value_options)={description: "Success"}];
+    STATUS_INT_UNKNOWN = 99;
+}
+enum ProcessOk{
+    OK = 0;
+
+}
+
 message DataType{
     string type = 1;
 }
 message Result
 {
-    optional ResultInt result_int = 1[(xml_field_options)={name:"RESULT_INT"}];
-    message Results{
+    message ResultData{
         message Value{
             string name = 1;
             string value = 2;
         }
         repeated Value values = 1;
     }
-    optional Results results = 2;
+    optional ResultData results = 2;
     optional DataType data_type = 3;
     optional google.protobuf.Any data = 4;
+
+    optional bool process_ok = 5;
+    optional string error_text = 6;
+    optional bool start_return = 7;
+    oneof is_status{
+        ResultInt result_int = 8[(xml_field_options)={name:"RESULT_INT"}];
+        ResultInt status_int = 9;
+    }
 }
+
+message Wrapper{
+    google.protobuf.Any content = 1;
+}
+

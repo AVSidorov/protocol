@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/json2xml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/xml2json" vcs="Git" />
   </component>
 </project>
