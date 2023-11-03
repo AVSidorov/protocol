@@ -120,16 +120,16 @@ int main() {
                 "  </RESULT-DATA>\n"
                 "  <ERROR_TEXT>\n"
                 "     sas\n"
-                "     \"Petya byl golodniy.\"\n"
+                "     Petya byl golodniy.\n"
                 "  </ERROR_TEXT>\n"
                 "</RESULT>";
 
     std::cout << xmlString << "\n\n";
     char* buf = new char[xmlString.size()];
-    xmlString.copy(buf,xmlString.size(), 0);
-    outstring.clear();
-    outstring = xml2json(buf);
-    std::cout << outstring << std::endl;
+//    xmlString.copy(buf,xmlString.size(), 0);
+//    outstring.clear();
+//    outstring = xml2json(buf);
+//    std::cout << outstring << std::endl;
 
     xmlString.copy(buf,xmlString.size(), 0);
     rapidxml::xml_document<> packet;
