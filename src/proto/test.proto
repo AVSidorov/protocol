@@ -27,10 +27,10 @@ extend google.protobuf.EnumValueOptions{
 }
 package ops.sap;
 
-enum ResultInt{
+enum ReturnInt{
     option (xml_enum_options) = {name: "RESULT_INT"};
-    RESULT_INT_OK = 0 [(xml_enum_value_options)={description: "Success"}];
-    RESULT_INT_UNKNOWN = 99;
+    RETURN_INT_OK = 0 [(xml_enum_value_options)={description: "Success"}];
+    RETURN_INT_UNKNOWN = 99;
 }
 enum StatusInt{
     option (xml_enum_options) = {name: "RESULT_INT"};
@@ -62,8 +62,12 @@ message Result
     optional string error_text = 6;
     optional bool start_return = 7;
     oneof is_status{
-        ResultInt result_int = 8[(xml_field_options)={name:"RESULT_INT"}];
-        ResultInt status_int = 9;
+        ReturnInt return_int = 8[(xml_field_options)={name:"RESULT_INT"}];
+        ReturnInt status_int = 9;
+    }
+    oneof is_status_text{
+        string return_text = 10;
+        string status_text = 11;
     }
 }
 

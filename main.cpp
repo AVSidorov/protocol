@@ -9,9 +9,9 @@
 int main() {
     std::string outstring;
     ops::sap::Result message;
-    message.set_result_int(ops::sap::ResultInt::RESULT_INT_OK);
+    message.set_return_int(ops::sap::ReturnInt::RETURN_INT_OK);
 
-    std::cout << "message.result_int: "<< message.result_int() << std::endl;
+    std::cout << "message.result_int: "<< message.return_int() << std::endl;
     std::cout << message.DebugString() << std::endl;
     google::protobuf::util::MessageToJsonString(message, &outstring);
     std::cout << outstring << std::endl;
@@ -46,7 +46,7 @@ int main() {
     message.mutable_results()->add_values()->set_name("NewValue1");
     message.mutable_results()->mutable_values(message.results().values_size()-1)->set_value("asdf");
     message.mutable_results()->add_values()->CopyFrom(value);
-    message.set_result_int(ops::sap::ResultInt::RESULT_INT_OK);
+    message.set_return_int(ops::sap::ReturnInt::RETURN_INT_OK);
     message.mutable_data_type()->CopyFrom(dataType);
 
 
@@ -138,9 +138,10 @@ int main() {
 //    rapidxml::print(std::cout,packet);
 
     rapidxml::xml_node<> *node;
-    std::vector<rapidxml::xml_node<>*> nodeStack;
-    std::string ident {""};
+    std::string ident;
     ident.reserve(16);
+    std::vector<rapidxml::xml_node<>*> nodeStack;
+
 
     node = static_cast<rapidxml::xml_node<>*>(&packet);
     nodeStack.push_back(node);
@@ -149,17 +150,21 @@ int main() {
         nodeStack.pop_back();
         if(node->type() == rapidxml::node_element)
         {
+            std::cout << ident;
             if (node->prefix()) { std::cout << node->prefix() << "."; }
             if (node->name()) { std::cout << node->name() << ": "; }
             if (node->value()) { std::cout << node->value() << std::endl; }
         }
 
-        if (node->first_node()){
-        for (auto child =  node->last_node() ; child; child = child->previous_sibling())
+        if (node->first_node())
         {
-            nodeStack.push_back(child);
-        }}
-            node = nodeStack.empty() ? nullptr : nodeStack.back();
+            for (auto child =  node->last_node() ; child; child = child->previous_sibling())
+            {
+                nodeStack.push_back(child);
+            }
+        } //else if(!ident.empty()){        ident.pop_back();        }
+        node = nodeStack.empty() ? nullptr : nodeStack.back();
+        //ident.append("\t");
     }
 
 
