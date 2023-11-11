@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/protocol.iml" filepath="$PROJECT_DIR$/.idea/protocol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/protocol_py.iml" filepath="$PROJECT_DIR$/.idea/protocol_py.iml" />
     </modules>
   </component>
 </project>

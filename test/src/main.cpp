@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
-#include "proto/test.pb.h"
+#include "test.pb.h"
 #include <google/protobuf/util/json_util.h>
 #include <stdio.h>
-#include <rapidxml.hpp>
+#include <rapidxml/rapidxml.hpp>
 
 int main() {
     std::string outstring;
@@ -122,7 +122,7 @@ int main() {
     xmlString.copy(buf,xmlString.size(), 0);
     rapidxml::xml_document<> packet;
     packet.parse<0>(xmlString.data());
-    std::cout << packet << "\n\n";
+//    std::cout << packet. << "\n\n";
 //    rapidxml::print(std::cout,packet);
 
     rapidxml::xml_node<> *node;
@@ -139,7 +139,6 @@ int main() {
         if(node->type() == rapidxml::node_element)
         {
             std::cout << ident;
-            if (node->prefix()) { std::cout << node->prefix() << "."; }
             if (node->name()) { std::cout << node->name() << ": "; }
             if (node->value()) { std::cout << node->value() << std::endl; }
         }
