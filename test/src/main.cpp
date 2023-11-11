@@ -2,9 +2,8 @@
 #include <string>
 #include "proto/test.pb.h"
 #include <google/protobuf/util/json_util.h>
-#include "ert/json2xml.hpp"
-#include "xml2json.hpp"
 #include <stdio.h>
+#include <rapidxml.hpp>
 
 int main() {
     std::string outstring;
@@ -93,36 +92,25 @@ int main() {
 
 
 
-    ert::JsonSaxConsumer consumer(2);
-    bool success = nlohmann::json::sax_parse(outstring, &consumer);
-
-    if (!success)
-        std::cerr << "Conversion error !" << std::endl;
-
-    // output xml
-    std::string xmlString {consumer.getXmlString()};
-    std::cout << xmlString;
-    std::cout << "\n\n";
-    //Doesn't work. Bad xml
-    //xml2json(xmlString.data());
-    xmlString = "<RESULT>\n"
-                "  <PROCESS_OK> true </PROCESS_OK>\n"
-                "  <RESULT_IN> 3 </RESULT_IN>\n"
-                "  <RESULT-DATA>\n"
-                "    <MESSWERT>\n"
-                "      <NAME> adsf </NAME>\n"
-                "      <WERT> zzvzx </WERT>\n"
-                "    </MESSWERT>\n"
-                "    <MESSWERT>\n"
-                "      <NAME> ddd </NAME>\n"
-                "      <WERT> 1.32E-12 </WERT>\n"
-                "    </MESSWERT>\n"
-                "  </RESULT-DATA>\n"
-                "  <ERROR_TEXT>\n"
-                "     sas\n"
-                "     Petya byl golodniy.\n"
-                "  </ERROR_TEXT>\n"
-                "</RESULT>";
+    std::string xmlString =\
+        "<RESULT>\n"
+        "  <PROCESS_OK> true </PROCESS_OK>\n"
+        "  <RESULT_IN> 3 </RESULT_IN>\n"
+        "  <RESULT-DATA>\n"
+        "    <MESSWERT>\n"
+        "      <NAME> adsf </NAME>\n"
+        "      <WERT> zzvzx </WERT>\n"
+        "    </MESSWERT>\n"
+        "    <MESSWERT>\n"
+        "      <NAME> ddd </NAME>\n"
+        "      <WERT> 1.32E-12 </WERT>\n"
+        "    </MESSWERT>\n"
+        "  </RESULT-DATA>\n"
+        "  <ERROR_TEXT>\n"
+        "     sas\n"
+        "     Petya byl golodniy.\n"
+        "  </ERROR_TEXT>\n"
+        "</RESULT>";
 
     std::cout << xmlString << "\n\n";
     char* buf = new char[xmlString.size()];
