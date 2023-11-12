@@ -25,6 +25,7 @@ extend google.protobuf.EnumOptions{
 extend google.protobuf.EnumValueOptions{
     optional XmlOptions xml_enum_value_options = 55003;
 }
+
 package ops.sap;
 
 enum ReturnInt{

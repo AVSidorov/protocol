@@ -4,6 +4,7 @@
 #include <google/protobuf/util/json_util.h>
 #include <stdio.h>
 #include <rapidxml/rapidxml.hpp>
+#include "pb2xml/xml_format.h"
 
 int main() {
     std::string outstring;
@@ -89,6 +90,11 @@ int main() {
     google::protobuf::util::MessageToJsonString(wrapper,&outstring);
     std::cout << outstring << std::endl;
     std::cout << wrapper.DebugString() << std::endl;
+
+    outstring.clear();
+    google::protobuf::XmlFormat::PrintToXmlString(message, &outstring);
+    std::cout << "Message to XML test" << std::endl;
+    std::cout << outstring << std::endl << std::endl;
 
 
 
