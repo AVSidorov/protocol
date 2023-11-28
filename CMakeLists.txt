@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.26)
+
+if(NOT DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_ROOT /home/sid/.clion-vcpkg/vcpkg)
+else()
+    cmake_path(SET VCPKG_ROOT NORMALIZE $ENV{VCPKG_ROOT} )
+endif()
+
 set(CMAKE_TOOLCHAIN_FILE
-        /home/sid/.clion-vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake
+        ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 )
+
+message("CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE}")
+
 project(pb2xml)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -10,6 +20,7 @@ set(CMAKE_CXX_STANDARD 20)
 #set(protos src/proto/test.proto)
 add_library(${PROJECT_NAME})
 
+#target_compile_definitions(${PROJECT_NAME} PRIVATE LIBPROTOBUF_EXPORTS)
 target_sources(${PROJECT_NAME}
         PRIVATE
         src/pb2xml/xml_format.cc

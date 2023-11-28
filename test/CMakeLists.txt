@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.26)
+
+if(NOT DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_ROOT /home/sid/.clion-vcpkg/vcpkg)
+else()
+    cmake_path(SET VCPKG_ROOT NORMALIZE $ENV{VCPKG_ROOT} )
+endif()
+
 set(CMAKE_TOOLCHAIN_FILE
-        /home/sid/.clion-vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake
+        ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 )
+
+message("CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE}")
+
 project(protocol_tests)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -48,5 +58,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         pb2xml
         ${PROJECT_NAME}_lib
 )
-
 

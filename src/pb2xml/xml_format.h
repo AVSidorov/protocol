@@ -19,7 +19,7 @@ namespace protobuf {
 // This class implements protocol buffer xml format.
 //
 // This class is really a namespace that contains only static methods.
-class LIBPROTOBUF_EXPORT XmlFormat {
+class XmlFormat {
  public:
 
   // Like MessageToDOM(), but outputs xml directly to a string.
@@ -30,7 +30,7 @@ class LIBPROTOBUF_EXPORT XmlFormat {
 
   // Class for those users which require more fine-grained control over how
   // a protobuffer message is printed out.
-  class LIBPROTOBUF_EXPORT Printer {
+  class Printer {
    public:
     Printer();
     ~Printer();
