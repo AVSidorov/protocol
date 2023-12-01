@@ -29,7 +29,9 @@ protobuf_generate(
         OUT_VAR PROTO_SRCS
         PROTOS "${protos}"
         PROTOC_OUT_DIR "${PROJECT_SOURCE_DIR}/../gen/cpp"
-        IMPORT_DIRS "${PROJECT_SOURCE_DIR}/src/proto/"
+        IMPORT_DIRS
+            "${PROJECT_SOURCE_DIR}/src/proto/"
+            "${PROJECT_SOURCE_DIR}/../src/pb2xml"
         APPEND_PATH
 )
 
@@ -52,7 +54,6 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/../gen/cpp
         ${CMAKE_CURRENT_LIST_DIR}/../src
 )
-
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         pb2xml

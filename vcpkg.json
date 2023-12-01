@@ -1,6 +1,8 @@
 {
   "dependencies" : [
     "protobuf",
-    "rapidxml"
+    "rapidxml",
+    "boost-lexical-cast",
+    "boost-algorithm"
   ]
 }

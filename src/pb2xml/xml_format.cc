@@ -6,7 +6,7 @@
 #include <google/protobuf/descriptor.pb.h>
 
 #include "xml_format.h"
-
+#include "xmlOptions.pb.h"
 
 #define XML_TRUE_STRING "true"
 #define XML_FALSE_STRING "false"

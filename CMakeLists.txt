@@ -36,21 +36,28 @@ find_path(RAPIDXML_INCLUDE_DIRS "rapidxml/rapidxml.hpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
-#protobuf_generate(
-#        TARGET pb2xml
-#        LANGUAGE cpp
-#        OUT_VAR PROTO_SRCS
-#        PROTOS "${protos}"
-#        PROTOC_OUT_DIR "${PROJECT_SOURCE_DIR}/gen/cpp"
-#        IMPORT_DIRS "${PROJECT_SOURCE_DIR}/src/proto/"
-#        APPEND_PATH
-#)
+protobuf_generate(
+        TARGET pb2xml
+        LANGUAGE cpp
+        OUT_VAR PROTO_SRCS
+        PROTOS "src/pb2xml/xmlOptions.proto"
+        PROTOC_OUT_DIR "${PROJECT_SOURCE_DIR}/gen/cpp"
+        IMPORT_DIRS "${PROJECT_SOURCE_DIR}/src/pb2xml/"
+        APPEND_PATH
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Protobuf_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${RAPIDXML_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/gen/cpp)
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Protobuf_LIBRARIES})
+
+
+find_package(Boost REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+
+message("Boost_LIBRARIES = ${Boost_LIBRARIES}")
 
 add_subdirectory(test)

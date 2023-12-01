@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+extend  google.protobuf.MessageOptions{
+  optional string message_desc = 51233;
+}
+
+extend google.protobuf.EnumValueOptions {
+  optional string enum_desc = 51234;
+}
+
+extend google.protobuf.FieldOptions{
+  optional string field_desc = 512345;
+}
+
+
+message StartRun
+{
+  option (message_desc) = "START_RUN";
+  string material_nr = 1 [(field_desc)="Material-Nr"];
+  string serial_nr =2 [(field_desc)="Serial-Nr"];
+}
+
+message GetStatus{
+  option (message_desc) = "GET_STATUS";
+}
+message GetResult{
+  option (message_desc) = "GET_RESULT";
+}
+message AbortRun{
+  option (message_desc) = "ABORT_RUN";
+}
+
+message Result{
+  option (message_desc) = "RESULT";
+  message ResultData{
+    option (message_desc) = "RESULT-DATA";
+    message MessVal{
+      option (message_desc) = "MESSWERT";
+      string name = 1 [(field_desc) = "NAME"];
+      string value = 2 [(field_desc) = "WERT"];
+    }
+    repeated MessVal messwerts = 1 [(field_desc)="MESSWERT"];
+  }
+  enum ReturnInt{
+    OK = 0;
+    PARAM_ERROR = 1  [(enum_desc) = "Parameter Fehler"];
+    CAM_NO_ANSWER = 2 [(enum_desc) = "Kalibrier-Kamerasoftware antwortet nicht"];
+    LAMP_NO_ANSWER = 3 [(enum_desc) = "Leuchte antwortet nicht"];
+    LAMP_TYPE_ERROR = 4 [(enum_desc) = "Falscher Leuchtentyp übergeben"];
+    UNKNOWN_ERROR = 99 [(enum_desc) = "Unbekannter Fehler"];
+  }
+
+  enum StatusInt{
+    UNDEF = 0 [(enum_desc) = "Undefined value"]; // 0 value must in enum present
+    IDLE = 1 [(enum_desc) = "Kalibrierung idle"];
+    AKTIVE = 2 [(enum_desc) = "Kalibrierung aktiv"];
+    ENDED = 3 [(enum_desc) = "Kalibrierung erfolgreich beendet"];
+    ABORTED = 4 [(enum_desc) = "Kalibrierung abgebrochen"];
+//    UNKNOWN_ERROR = 99 [(enum_desc) = "Unbekannter Fehler (während der Kalibrierung)"];
+  }
+
+
+
+  bool process_ok = 1 [(field_desc)= "PROCESS_OK"];
+  // true: kein Fehler in Verarbeitung false: Fehler in Verarbeitung (nur Element <ERROR_TEXT> gefüllt)
+  // PROCESS_OK: für unerwartete Fehler im internen Programmablauf der
+  // Kalibriersoftware (Exceptions). Sollte immer true sein.
+  string  error_text= 2 [(field_desc) = "ERROR_TEXT"]; // Fehlertext oder leer
+
+
+
+  oneof start_abort{
+    bool start_return = 4 [(field_desc) = "START_RETURN"]; //true:  Kalibriervorgang gestartet  false: Kalibriervorgang nicht gestartet
+    bool abort_return = 5 [(field_desc) = "ABORT_RETURN"]; // true: Kalibriervorgang gestoppt false: Kalibriervorgang nicht gestoppt
+  }
+
+  oneof cmd_status{
+    StatusInt status_int = 6 [(field_desc) = "STATUS_INT"];
+    ReturnInt return_int = 7 [(field_desc) = "RETURN_INT"];
+  }
+
+  optional string status_text = 8 [(field_desc) = "STATUS_TEXT"];
+  optional string return_text = 9 [(field_desc) = "RETURN_TEXT"]; // String Kurzerklärung in Deutsch für RETURN_INT, RETURN_INT=99: Eventueller Fehlertext
+
+  optional ResultData result_data = 10 [(field_desc) = "RESULT-DATA"];
+
+}
