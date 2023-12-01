@@ -1,24 +1,14 @@
 syntax = "proto3";
 
-import "google/protobuf/descriptor.proto";
-extend  google.protobuf.MessageOptions{
-  optional string message_desc = 51233;
-}
+import "xmlOptions.proto";
 
-extend google.protobuf.EnumValueOptions {
-  optional string enum_desc = 51234;
-}
-
-extend google.protobuf.FieldOptions{
-  optional string field_desc = 512345;
-}
-
+package ops.sap;
 
 message StartRun
 {
-  option (message_desc) = "START_RUN";
-  string material_nr = 1 [(field_desc)="Material-Nr"];
-  string serial_nr =2 [(field_desc)="Serial-Nr"];
+  option (xml_message_options) = {name: "START_RUN"};
+  string material_nr = 1 [(xml_field_options)= {name: "Material-Nr"}];
+  string serial_nr =2 [(xml_field_options)= {name: "Serial-Nr"}];
 }
 
 message GetStatus{

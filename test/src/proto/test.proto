@@ -72,5 +72,14 @@ message AllInOne{
     bytes  bts = 15;
     optional string opt = 16;
     repeated string rpt = 17;
-//    optional repeated string rpt = 17;
+    enum Enm{
+        option (xml_enum_options) = {name: "RESULT_INT"};
+        OK = 0 [(xml_enum_value_options) = {description: "Success"}];
+        PARAM_ERROR = 1  [(xml_enum_value_options) = {description: "Parameter Fehler"}];
+        CAM_NO_ANSWER = 2 [(xml_enum_value_options) = {description: "Kalibrier-Kamerasoftware antwortet nicht"}];
+        LAMP_NO_ANSWER = 3 [(xml_enum_value_options) = {description: "Leuchte antwortet nicht"}];
+        LAMP_TYPE_ERROR = 4 [(xml_enum_value_options) = {description: "Falscher Leuchtentyp übergeben"}];
+        UNKNOWN_ERROR = 99 [(xml_enum_value_options) = {description: "Unbekannter Fehler"}];
+    }
+    Enm enm = 18 [(xml_field_options)={name: "RESULT_INT"}];
 }
