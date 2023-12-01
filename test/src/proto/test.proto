@@ -72,6 +72,7 @@ message AllInOne{
     bytes  bts = 15;
     optional string opt = 16;
     repeated string rpt = 17;
+
     enum Enm{
         option (xml_enum_options) = {name: "RESULT_INT"};
         OK = 0 [(xml_enum_value_options) = {description: "Success"}];
@@ -82,4 +83,15 @@ message AllInOne{
         UNKNOWN_ERROR = 99 [(xml_enum_value_options) = {description: "Unbekannter Fehler"}];
     }
     Enm enm = 18 [(xml_field_options)={name: "RESULT_INT"}];
+
+    message ResultData{
+        option (xml_message_options) ={name: "RESULT-DATA"};
+        message Value{
+            option (xml_message_options) ={name: "MESSWERT"};
+            string name = 1 [(xml_field_options) = {name: "NAME"}];
+            string value = 2 [(xml_field_options) = {name: "WERT"}];
+        }
+        repeated Value values = 1 [(xml_field_options) ={name: "MESSWERT"}];
+    }
+    ResultData result_data = 19 [(xml_field_options)={name: "RESULT-DATA"}];
 }

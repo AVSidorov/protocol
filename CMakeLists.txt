@@ -24,11 +24,13 @@ add_library(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
         PRIVATE
         src/pb2xml/xml_format.cc
+        src/xml2pb/xml_util.cpp
         PUBLIC FILE_SET ${PROJECT_NAME}_HEADERS
         TYPE HEADERS
         FILES
             src/pb2xml/xml_format.h
             src/pb2xml/rapidxml_ext.h
+            src/xml2pb/xml_util.h
 )
 
 find_package(Protobuf REQUIRED)
@@ -53,11 +55,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/gen/cpp)
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Protobuf_LIBRARIES})
-
-
-find_package(Boost REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
-
-message("Boost_LIBRARIES = ${Boost_LIBRARIES}")
 
 add_subdirectory(test)
