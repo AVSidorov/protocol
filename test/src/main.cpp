@@ -302,6 +302,43 @@ int main() {
         "    <FLOAT> 1.34e-12 </FLOAT>\n"
         "    <RESULT_INT> 99 </RESULT_INT>\n"
         "    <RESULT-DATA>\n"
+        "    </RESULT-DATA>\n"
+        "</TEST>\n";
+    testXMLtoMessage(testMessage, xmlString);
+    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
+
+    outstring.clear();
+    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
+    std::cout << outstring << std::endl;
+
+    xmlString =\
+        "<TEST>\n"
+        "    <rpt>Df dlksl a</rpt>\n"
+        "    <rpt> Hallo World!!!</rpt>\n"
+        "    <FLOAT> 1.34e-12 </FLOAT>\n"
+        "    <RESULT_INT> 99 </RESULT_INT>\n"
+        "    <RESULT-DATA>\n"
+        "        <MESSWERT>\n"
+        "            <NAME>Voltage</NAME>\n"
+        "            <WERT>1.3</WERT>\n"
+        "        </MESSWERT>\n"
+        "    </RESULT-DATA>\n"
+        "</TEST>\n";
+
+    testXMLtoMessage(testMessage, xmlString);
+    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
+
+    outstring.clear();
+    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
+    std::cout << outstring << std::endl;
+
+    xmlString =\
+        "<TEST>\n"
+        "    <rpt>Df dlksl a</rpt>\n"
+        "    <rpt> Hallo World!!!</rpt>\n"
+        "    <FLOAT> 1.34e-12 </FLOAT>\n"
+        "    <RESULT_INT> 99 </RESULT_INT>\n"
+        "    <RESULT-DATA>\n"
         "        <MESSWERT>\n"
         "            <NAME>Voltage</NAME>\n"
         "            <WERT>1.3</WERT>\n"
@@ -312,14 +349,13 @@ int main() {
         "        </MESSWERT>\n"
         "    </RESULT-DATA>\n"
         "</TEST>\n";
+
     testXMLtoMessage(testMessage, xmlString);
-    std::cout << testMessage.enm() << std::endl;
+    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
 
     outstring.clear();
     google::protobuf::util::MessageToJsonString(testMessage, &outstring);
     std::cout << outstring << std::endl;
-
-
 
     google::protobuf::ShutdownProtobufLibrary();
     return 0;

@@ -243,7 +243,7 @@ namespace google::protobuf::util{
         }
     }
 
-    Status XMLtoField(Message& message, const rapidxml::xml_node<> * node)
+    Status XMLtoField(Message& message, const rapidxml::xml_node<>* node)
     {
         std::string nodeName;
         std::string nodeValue;
@@ -256,7 +256,17 @@ namespace google::protobuf::util{
                     return StrValueToField(message, field, node->value());
                 }
                 else if(field->type() == FieldDescriptor::TYPE_MESSAGE){
-                    return XMLtoMessage(message, node);
+                    if (field->is_optional()) {
+                        auto msg = message.GetReflection()->MutableMessage(&message,field);
+                        return XMLtoMessage(*msg, node);
+                    } else if (field->is_repeated()) {
+                        message.GetReflection()->AddMessage(&message,field);
+                        auto fieldSize = message.GetReflection()->FieldSize(message, field);
+                        auto msg = message.GetReflection()->MutableRepeatedMessage(&message,field, fieldSize-1);
+                        return XMLtoMessage(*msg, node);
+                    } else {
+                        return {StatusCode::kUnknown, "nothing is written"};
+                    }
                 }
                 else{
                     return {StatusCode::kNotFound, "unknown field type"};
