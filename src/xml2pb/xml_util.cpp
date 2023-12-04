@@ -2,6 +2,7 @@
 // Created by Developer on 01.12.2023.
 //
 #include "xml_util.h"
+#include <format>
 
 namespace google::protobuf::util{
     const FieldDescriptor* FindFieldByXmlName(Message& message, const std::string& nodeName){
@@ -30,7 +31,7 @@ namespace google::protobuf::util{
         return value;
     }
 
-    bool XmlString2bool(std::string value){
+    bool XmlStringToBool(std::string value){
         value = XmlPrepareValue(value) ;
         if(value == "true" || value == "1" || value == "on"){
             return true;
@@ -44,11 +45,11 @@ namespace google::protobuf::util{
         }
     }
 
-    float XmlString2float(std::string value){
+    float XmlStringToFloat(std::string value){
         return std::stof(value);
     }
 
-    const EnumValueDescriptor* XmlString2enum(std::string value,const EnumDescriptor* enumDescriptor){
+    const EnumValueDescriptor* XmlStringToEnum(std::string value, const EnumDescriptor* enumDescriptor){
         //auto xmlOptions = enumDescriptor->options().GetExtension(xml_enum_options);
         value.erase(remove_if(value.begin(), value.end(), isspace), value.end());
         const EnumValueDescriptor* val;
@@ -84,7 +85,7 @@ namespace google::protobuf::util{
                 bool val;
                 try
                 {
-                    val = XmlString2bool(value);
+                    val = XmlStringToBool(value);
                 }
                 catch (std::exception &e) {
                     return {StatusCode::kOutOfRange, e.what()};
@@ -124,7 +125,7 @@ namespace google::protobuf::util{
                 float val;
                 try
                 {
-                    val = XmlString2float(value);
+                    val = XmlStringToFloat(value);
                 }
                 catch (std::exception &e) {
                     return {StatusCode::kOutOfRange, e.what()};
@@ -226,7 +227,7 @@ namespace google::protobuf::util{
                 }
             }
             case FieldDescriptor::CPPTYPE_ENUM: {
-                auto val = XmlString2enum(value, field->enum_type());
+                auto val = XmlStringToEnum(value, field->enum_type());
                 if (field->is_optional()) {
                     reflection->SetEnum(&message, field, val);
                     return {StatusCode::kOk, "optional enum value is written"};
@@ -243,7 +244,7 @@ namespace google::protobuf::util{
         }
     }
 
-    Status XMLtoField(Message& message, const rapidxml::xml_node<>* node)
+    Status XmlToField(Message& message, const rapidxml::xml_node<>* node)
     {
         std::string nodeName;
         std::string nodeValue;
@@ -258,12 +259,12 @@ namespace google::protobuf::util{
                 else if(field->type() == FieldDescriptor::TYPE_MESSAGE){
                     if (field->is_optional()) {
                         auto msg = message.GetReflection()->MutableMessage(&message,field);
-                        return XMLtoMessage(*msg, node);
+                        return XmlToMessage(*msg, node);
                     } else if (field->is_repeated()) {
                         message.GetReflection()->AddMessage(&message,field);
                         auto fieldSize = message.GetReflection()->FieldSize(message, field);
                         auto msg = message.GetReflection()->MutableRepeatedMessage(&message,field, fieldSize-1);
-                        return XMLtoMessage(*msg, node);
+                        return XmlToMessage(*msg, node);
                     } else {
                         return {StatusCode::kUnknown, "nothing is written"};
                     }
@@ -278,7 +279,7 @@ namespace google::protobuf::util{
         }
     }
 
-    Status XMLtoMessage(Message& message, const rapidxml::xml_node<>* node){
+    Status XmlToMessage(Message& message, const rapidxml::xml_node<>* node){
         std::string nodeName;
         if (node->type() == rapidxml::node_element) {
             nodeName = node->name();
@@ -288,6 +289,8 @@ namespace google::protobuf::util{
         }
 
         auto msgName = message.GetTypeName();
+
+        msgName = message.GetDescriptor()->name();
 
         auto xmlOptions = message.GetDescriptor()->options().GetExtension(xml_message_options);
 
@@ -302,10 +305,220 @@ namespace google::protobuf::util{
         else
         {
             for(auto child = node->first_node(); child; child = child->next_sibling()){
-                XMLtoField(message, child);
+                XmlToField(message, child);
             }
         }
         return {StatusCode::kOk,""};
     }
 
+    Status MessageToXmlDoc(const Message& message, rapidxml::xml_document<>* doc){
+        return MessageToXmlNode(message, static_cast<rapidxml::xml_node<>*>(doc));
+    }
+
+    Status MessageToXmlNode(const Message& message, rapidxml::xml_node<>* node, const char* fieldName){
+        const char* msgName;
+        auto doc = node->document();
+
+        if (!fieldName) {
+            auto xmlOptions = message.GetDescriptor()->options().GetExtension(xml_message_options);
+
+            if (xmlOptions.has_name()) {
+                msgName = doc->allocate_string(xmlOptions.name().c_str());
+            }
+            else{
+                msgName = doc->allocate_string(message.GetDescriptor()->name().c_str());
+            }
+        }
+        else{
+            msgName = fieldName;
+        }
+
+
+        auto msgNode = doc->allocate_node(rapidxml::node_element, msgName);
+
+        node->append_node(msgNode);
+
+        const Reflection *reflection = message.GetReflection();
+        std::vector<const FieldDescriptor*> fields;
+        reflection->ListFields(message, &fields);
+
+        for(auto field : fields){
+            FieldToXmlNode(message, field, msgNode);
+        }
+        return {StatusCode::kOk, ""};
+    }
+
+    Status FieldToXmlNode(const Message& message, const FieldDescriptor* field, rapidxml::xml_node<>* node){
+        const char* fieldName;
+        auto doc = node->document();
+        auto xmlOptions = field->options().GetExtension(xml_field_options);
+
+        if(xmlOptions.has_name()){
+            fieldName = doc->allocate_string(xmlOptions.name().c_str());
+        }
+        else{
+            fieldName = doc->allocate_string(field->name().c_str());
+        }
+
+        auto maxInd = field->is_repeated() ? message.GetReflection()->FieldSize(message, field) : 0;
+
+        const Reflection* reflection = message.GetReflection();
+
+        switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_STRING: {
+                //TODO check content of string and use CDATA if string contains xml tags and so on
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(reflection->GetRepeatedString(message, field, i).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(reflection->GetString(message, field).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_BOOL: {
+                //TODO add to xml_options format
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedBool(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetBool(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_DOUBLE: {
+                //TODO add to xml_options format
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedDouble(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetDouble(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_FLOAT: {
+                //TODO add to xml_options format
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedFloat(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::format("{:3.5e}",reflection->GetFloat(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_INT32: {
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedInt32(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetInt32(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_INT64: {
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedInt64(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetInt64(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_UINT32: {
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedUInt32(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetUInt32(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_UINT64: {
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedUInt64(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetUInt64(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+
+            }
+            case FieldDescriptor::CPPTYPE_ENUM: {
+                //TODO add to xml_options option value/enum name
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        auto value = doc->allocate_string(std::to_string(reflection->GetRepeatedEnumValue(message, field, i)).c_str());
+                        auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                        node->append_node(newNode);
+                    }
+                }
+                else{
+                    auto value = doc->allocate_string(std::to_string(reflection->GetEnumValue(message, field)).c_str());
+                    auto newNode = doc->allocate_node(rapidxml::node_element,fieldName, value);
+                    node->append_node(newNode);
+                }
+                break;
+
+            }
+            case FieldDescriptor::CPPTYPE_MESSAGE: {
+                if(field->is_repeated()) {
+                    for (auto i = 0; i < maxInd; ++i) {
+                        MessageToXmlNode(reflection->GetRepeatedMessage(message, field, i), node, fieldName);
+                    }
+                }
+                else{
+                    MessageToXmlNode(reflection->GetMessage(message, field), node, fieldName);
+                }
+                break;
+            }
+        }
+        return {StatusCode::kOk, ""};
+    }
 }

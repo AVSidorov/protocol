@@ -16,17 +16,24 @@ const FieldDescriptor* FindFieldByXmlName(Message& message, const std::string& n
 
 std::string XmlPrepareValue(std::string value);
 
-bool XmlString2bool(std::string value);
+bool XmlStringToBool(std::string value);
 
-float XmlString2float(std::string value);
+float XmlStringToFloat(std::string value);
 
-const EnumValueDescriptor* XmlString2enum(std::string value,const EnumDescriptor* enumDescriptor);
+const EnumValueDescriptor* XmlStringToEnum(std::string value, const EnumDescriptor* enumDescriptor);
 
 Status StrValueToField(Message& message, const FieldDescriptor* field, const std::string& value);
 
-Status XMLtoField(Message& message, const rapidxml::xml_node<> * node);
+Status XmlToField(Message & message, const rapidxml::xml_node<> * node);
 
-Status XMLtoMessage(Message& message, const rapidxml::xml_node<>* node);
+Status XmlToMessage(Message & message, const rapidxml::xml_node<>* node);
+
+Status MessageToXmlDoc(const Message& message, rapidxml::xml_document<>* doc);
+
+//@param fieldName is necessary due to name can be determined not by message name, but by fieldName (field of message type)
+Status MessageToXmlNode(const Message& message, rapidxml::xml_node<>* node, const char* fieldName = nullptr);
+
+Status FieldToXmlNode(const Message& message, const FieldDescriptor* field, rapidxml::xml_node<>* node);
 
 }
 #endif //PB2XML_XML_UTIL_H

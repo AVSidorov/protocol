@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <stdexcept>
 
@@ -12,7 +13,11 @@
 using namespace google::protobuf;
 
 void messageFieldsFromReflection(const Message& message){
-  std::cout << "\n\n Message from Reflection " << message.GetTypeName() << "\n\n";
+  std::cout << "\n\nMessage from Reflection " << "\n";
+  std::cout << "TypeName: " << message.GetTypeName() << "\n";
+  std::cout << "Message name: " << message.GetDescriptor()->name() << "\n";
+  std::cout << "Message full_name: " << message.GetDescriptor()->full_name() << "\n\n";
+
   const Reflection *reflection = message.GetReflection();
   std::vector<const FieldDescriptor*> fields;
   reflection->ListFields(message, &fields);
@@ -45,17 +50,21 @@ void messageFieldsFromReflection(const Message& message){
 }
 
 void messageFieldsFromDescriptor(const Message& message){
-  std::cout << "\n\n Message from descriptor " << message.GetTypeName() << "\n\n";
-  auto descriptor = message.GetDescriptor();
-  for(auto i = 0; i < descriptor->field_count(); ++i){
-    auto field = descriptor->field(i);
-    std::cout << "name: "<< field->name() << std::endl;
-    std::cout << "full_name: " << field->full_name() << std::endl;
-    std::cout <<"json_name: "<< field->json_name() << std::endl;
-    std::cout <<"cpp_type: " << field->cpp_type() << std::endl;
-    std::cout <<"is_optional: " << field->is_optional() << std::endl;
-    std::cout <<"is_repeated: " << field->is_repeated() << std::endl;
-  }
+    std::cout << "\n\nMessage from descriptor " << "\n";
+    std::cout << "TypeName: " << message.GetTypeName() << "\n";
+    std::cout << "Message name: " << message.GetDescriptor()->name() << "\n";
+    std::cout << "Message full_name: " << message.GetDescriptor()->full_name() << "\n\n";
+
+    auto descriptor = message.GetDescriptor();
+    for(auto i = 0; i < descriptor->field_count(); ++i){
+        auto field = descriptor->field(i);
+        std::cout << "name: "<< field->name() << std::endl;
+        std::cout << "full_name: " << field->full_name() << std::endl;
+        std::cout <<"json_name: "<< field->json_name() << std::endl;
+        std::cout <<"cpp_type: " << field->cpp_type() << std::endl;
+        std::cout <<"is_optional: " << field->is_optional() << std::endl;
+        std::cout <<"is_repeated: " << field->is_repeated() << std::endl;
+    }
 }
 
 void enumFieldsFromDescriptor(const EnumDescriptor * enumDescriptor){
@@ -70,17 +79,36 @@ void enumFieldsFromDescriptor(const EnumDescriptor * enumDescriptor){
 }
 
 void testXMLtoMessage(Message& message, std::string xmlString){
+    std::cout << "======= START testXMLtoMessage =======" << "\n";
+    const Reflection* reflection = message.GetReflection();
+    const Descriptor* descriptor = message.GetDescriptor();
+
     // string should be copied
     // rapidxml changes string in place during parse
-    std::cout << xmlString << std::endl;
+    std::cout << "Convert XML String: \n"<< xmlString << std::endl;
+    std::cout<< "to message: " << descriptor->full_name() << std::endl;
 
     rapidxml::xml_document<> doc;
 
     doc.parse<0>(xmlString.data());
 
     message.Clear();
-    std::cout << std::string(google::protobuf::util::XMLtoMessage(message, doc.first_node()).message()) << std::endl;
-    std::cout << message.DebugString() << std::endl;
+    std::cout << std::string(google::protobuf::util::XmlToMessage(message, doc.first_node()).message()) << std::endl;
+    std::cout << "message.DebugString: \n"<< message.DebugString() << std::endl;
+    std::cout << "message.ShortDebugString: \n"<< message.ShortDebugString() << std::endl;
+
+
+    std::string outstring;
+    google::protobuf::util::MessageToJsonString(message, &outstring);
+    std::cout << "Message JSON: \n"<< outstring << std::endl;
+
+    doc.clear();
+    google::protobuf::util::MessageToXmlDoc(message, &doc);
+
+    std::cout << doc;
+    rapidxml::print(std::cout, doc, rapidxml::print_no_indenting);
+
+    std::cout << "\n======= END testXMLtoMessage =======" << "\n\n";
 }
 
 void testRapidXmlProbe(){
@@ -153,20 +181,6 @@ void testRapidXmlProbe(){
 int main() {
     std::string outstring;
     ops::sap::Result message;
-    message.set_return_int(ops::sap::ReturnInt::RETURN_INT_OK);
-
-    std::cout << "message.result_int: "<< message.return_int() << std::endl;
-    std::cout << message.DebugString() << std::endl;
-    google::protobuf::util::MessageToJsonString(message, &outstring);
-    std::cout << outstring << std::endl;
-
-
-    ops::sap::DataType dataType;
-    dataType.set_type("ResultInt");
-
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(dataType, &outstring);
-    std::cout << outstring << std::endl;
 
     outstring.clear();
     outstring = "{\n"
@@ -179,6 +193,7 @@ int main() {
                 "}";
     std::cout << outstring << std::endl;
     google::protobuf::util::JsonStringToMessage(outstring, &message);
+
     for (auto value :message.results().values()){
         std::cout << "value.name: " << value.name() << std::endl;
         std::cout << "value.value: " << value.value() << std::endl;
@@ -191,7 +206,7 @@ int main() {
     message.mutable_results()->mutable_values(message.results().values_size()-1)->set_value("asdf");
     message.mutable_results()->add_values()->CopyFrom(value);
     message.set_return_int(ops::sap::ReturnInt::RETURN_INT_OK);
-    message.mutable_data_type()->CopyFrom(dataType);
+//    message.mutable_data_type()->CopyFrom(dataType);
 
 
     outstring.clear();
@@ -235,8 +250,14 @@ int main() {
 
     outstring.clear();
     google::protobuf::XmlFormat::PrintToXmlString(message, &outstring);
-    std::cout << "Message to XML test" << std::endl;
+    std::cout << "Message to XML test pb2xml" << std::endl;
     std::cout << outstring << std::endl << std::endl;
+
+    rapidxml::xml_document<> messageXML;
+
+    google::protobuf::util::MessageToXmlDoc(message, &messageXML);
+
+    std::cout << "Message to XML test sid: \n" << messageXML;
 
     testRapidXmlProbe();
 
@@ -265,7 +286,7 @@ int main() {
         "<TEST>\n"
         "    <rpt>Df dlksl a</rpt>\n"
         "    <rpt> Hallo World!!!</rpt>\n"
-        "    <FLOAT> 1.34e-12 </FLOAT>\n"
+        "    <FLOAT> -.1 </FLOAT>\n"
         "</TEST>\n";
     testXMLtoMessage(testMessage, xmlString);
 
@@ -277,9 +298,7 @@ int main() {
         "    <FLOAT> .034e12 </FLOAT>\n"
         "</TEST>\n";
     testXMLtoMessage(testMessage, xmlString);
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
-    std::cout << outstring << std::endl;
+    std::cout << "AllInOne.enm (value): " <<testMessage.enm() << std::endl;
 
     xmlString =\
         "<TEST>\n"
@@ -289,11 +308,8 @@ int main() {
         "    <RESULT_INT> 99 </RESULT_INT>\n"
         "</TEST>\n";
     testXMLtoMessage(testMessage, xmlString);
-    std::cout << testMessage.enm() << std::endl;
+    std::cout << "AllInOne.enm (value): " << testMessage.enm() << std::endl;
 
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
-    std::cout << outstring << std::endl;
 
     xmlString =\
         "<TEST>\n"
@@ -305,11 +321,6 @@ int main() {
         "    </RESULT-DATA>\n"
         "</TEST>\n";
     testXMLtoMessage(testMessage, xmlString);
-    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
-
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
-    std::cout << outstring << std::endl;
 
     xmlString =\
         "<TEST>\n"
@@ -324,13 +335,7 @@ int main() {
         "        </MESSWERT>\n"
         "    </RESULT-DATA>\n"
         "</TEST>\n";
-
     testXMLtoMessage(testMessage, xmlString);
-    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
-
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
-    std::cout << outstring << std::endl;
 
     xmlString =\
         "<TEST>\n"
@@ -349,13 +354,9 @@ int main() {
         "        </MESSWERT>\n"
         "    </RESULT-DATA>\n"
         "</TEST>\n";
+    testXMLtoMessage(testMessage, xmlString);
 
     testXMLtoMessage(testMessage, xmlString);
-    std::cout <<"testMessage.enm(value): "<<testMessage.enm() << std::endl;
-
-    outstring.clear();
-    google::protobuf::util::MessageToJsonString(testMessage, &outstring);
-    std::cout << outstring << std::endl;
 
     google::protobuf::ShutdownProtobufLibrary();
     return 0;
