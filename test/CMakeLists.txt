@@ -44,6 +44,8 @@ target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${Protobuf_LIBRARIES})
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE XML_UTIL_STATIC)
+
 find_path(RAPIDXML_INCLUDE_DIRS "rapidxml/rapidxml.hpp")
 
 target_include_directories(${PROJECT_NAME}

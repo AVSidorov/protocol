@@ -6,6 +6,8 @@
 #ifndef GOOGLE_PROTOBUF_XML_FORMAT_H__
 #define GOOGLE_PROTOBUF_XML_FORMAT_H__
 
+#include "xml_util_constants.h"
+
 #include <string>
 #include <vector>
 #include "rapidxml_ext.h"
@@ -14,13 +16,14 @@
 #include <google/protobuf/descriptor.h>
 
 
+
 namespace google {
 namespace protobuf {
 
 // This class implements protocol buffer xml format.
 //
 // This class is really a namespace that contains only static methods.
-class XmlFormat {
+class XML_UTIL_EXPORT XmlFormat {
  public:
 
   // Like MessageToDOM(), but outputs xml directly to a string.
@@ -31,7 +34,7 @@ class XmlFormat {
 
   // Class for those users which require more fine-grained control over how
   // a protobuffer message is printed out.
-  class Printer {
+  class XML_UTIL_EXPORT Printer {
    public:
     Printer();
     ~Printer();

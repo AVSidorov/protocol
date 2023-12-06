@@ -20,7 +20,13 @@ set(CMAKE_CXX_STANDARD 20)
 #set(protos src/proto/test.proto)
 add_library(${PROJECT_NAME})
 
-#target_compile_definitions(${PROJECT_NAME} PRIVATE LIBPROTOBUF_EXPORTS)
+if(NOT ${BUILD_SHARED_LIBS})
+    message(STATUS "Build ${PROJECT_NAME} STATIC Library")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE XML_UTIL_STATIC)
+endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE XML_UTIL_BUILD_LIB)
+
 target_sources(${PROJECT_NAME}
         PRIVATE
         src/pb2xml/xml_format.cc

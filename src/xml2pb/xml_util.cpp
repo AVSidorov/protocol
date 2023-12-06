@@ -2,6 +2,8 @@
 // Created by Developer on 01.12.2023.
 //
 #include "xml_util.h"
+
+#include <xmlOptions.pb.h>
 #include <format>
 
 namespace google::protobuf::util{
